@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello World!</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="./render.js"></script>
+</head>
+
+<body>
+  <div id="loadingScreen" class="hidden">
+    <h1>Loading...</h1>
+  </div>
+  <div id="content">
+    <h1>Select folder</h1>
+    <label for="myfile">Select a file:</label>
+    <input type="file" id="myfile" name="myfile" accept=".jpg, .png" multiple>
+    <br />
+    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="btnn">Submit</button>
+  </div>
+</body>
+
+</html>
