@@ -3,52 +3,28 @@ const content = document.getElementById("content");
 const myfile = document.getElementById("myfile");
 const submit = document.getElementById("btnn");
 
+const { promisify } = require("util");
 const PDFDocument = require("pdfkit");
+const imgSize = promisify(require("image-size"));
 const fs = require("fs");
 const { remote } = require("electron");
 const { dialog, app } = remote;
-
-function showLoadingScreen() {
-  loadingScreen.classList.remove("hidden");
-  content.classList.add("hidden");
-}
-
-function hideLoadingScreen() {
-  loadingScreen.classList.add("hidden");
-  content.classList.remove("hidden");
-}
 
 let selectedFiles = [];
 let imageDimensions = [];
 
 myfile.onchange = () => {
-  showLoadingScreen();
   selectedFiles = myfile.files;
   console.log(selectedFiles);
-
   for (let i = 0; i < selectedFiles.length; i++) {
-    const selectedFile = selectedFiles[i];
-
-    const reader = new FileReader();
-
-    reader.onload = async function (event) {
-      const imageElement = new Image();
-      imageElement.onload = function () {
-        const imageWidth = imageElement.naturalWidth;
-        const imageHeight = imageElement.naturalHeight;
-
-        imageDimensions[i] = [imageWidth, imageHeight];
-        if (imageDimensions.length === selectedFiles.length) {
-          console.log(imageDimensions);
-        }
-      };
-
-      imageElement.src = event.target.result;
-    };
-
-    reader.readAsDataURL(selectedFile);
+    imgSize(selectedFiles[i].path)
+      .then((dimensions) => {
+        console.log(dimensions.width, dimensions.height);
+        imageDimensions.push([dimensions.width, dimensions.height]);
+      })
+      .catch((err) => console.error(err));
   }
-  hideLoadingScreen();
+
 };
 
 submit.onclick = async function createPDF() {
@@ -69,9 +45,7 @@ submit.onclick = async function createPDF() {
   });
 
   for (let i = 1; i < selectedFiles.length; i++) {
-    console.log(selectedFiles[i].path);
-
-    doc.addPage({
+      doc.addPage({
       size: [imageDimensions[i][0], imageDimensions[i][1]],
       margins: {
         top: 0,
@@ -87,17 +61,11 @@ submit.onclick = async function createPDF() {
     });
   }
 
-  //   const filepath = dialog.showOpenDialogSync({
-  //     title: "Save PDF",
-  //     buttonLabel: "Save PDF",
-  //     defaultPath: "output.pdf",
-  //   });
-
   await dialog
     .showSaveDialog({
       filters: [
         {
-          name: "Adobe PDF",
+          name: "PDF Document",
           extensions: [".pdf"],
         },
       ],
